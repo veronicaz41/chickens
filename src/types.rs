@@ -71,27 +71,17 @@ impl UserAction {
             .collect_vec();
     }
 
-    /// Unpack ciphers
-    ///
-    /// 1. Decompression: A cipher is a matrix generated from a seed. The seed is sent through the network as a compression. By calling the `unseed` method we recovered the matrix here.
-    /// 2. Key Switch: We reencrypt the cipher with the server key for the computation. We need to specify the original signer of the cipher.
-    /// 3. Extract: A user's encrypted inputs are packed in a batched struct. We call `extract_all` method to convert it to unbatched word.
-    pub(crate) fn unpack(&self, user_id: UserId) -> CircuitInput {
-        todo!();
-        // self.karma_sent
-        //     .iter()
-        //     .map(|word| {
-        //         word.unseed::<Vec<Vec<u64>>>()
-        //             .key_switch(user_id)
-        //             .extract_all()
-        //     })
-        //     .collect_vec()
-    }
 }
 
 fn encrypt_plain(ck: &ClientKey, plain: PlainWord) -> EncryptedWord {
     let plain = u64_to_binary::<32>(plain as u64);
     ck.encrypt(plain.as_slice())
+}
+
+fn unpack_word(word: EncryptedWord, user_id: UserId) -> Word {
+    word.unseed::<Vec<Vec<u64>>>()
+        .key_switch(user_id)
+        .extract_all()
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
